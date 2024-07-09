@@ -5,7 +5,7 @@ export default function ChatboxIndex() {
 
     const handleButtonClick = () => {
         // Implement your logic here
-        setUservisit(false);
+        // setUservisit(false);
     };
 
     return (
@@ -21,26 +21,26 @@ export default function ChatboxIndex() {
                                             <div className="flex justify-end items-baseline mb-4 space-x-4">
                                                 <button
                                                     onClick={handleButtonClick}
-                                                    className="bg-[#001835] text-[#FFFFFF] py-2 px-4 rounded border border-white"
+                                                    className="bg-[#001835] text-[#FFFFFF] py-2 px-4 rounded border border-white hover:bg-[#002a50] hover:border-[#f0f0f0]"
                                                 >
                                                     Workout Plan
                                                 </button>
                                                 <button
                                                     onClick={handleButtonClick}
-                                                    className="bg-[#001835] text-[#FFFFFF] py-2 px-4 rounded border border-white"
+                                                    className="bg-[#001835] text-[#FFFFFF] py-2 px-4 rounded border border-white hover:bg-[#002a50] hover:border-[#f0f0f0]"
                                                 >
                                                     Nutritional Advice
                                                 </button>
                                                 <button
                                                     onClick={handleButtonClick}
-                                                    className="bg-[#001835] text-[#FFFFFF] py-2 px-4 rounded border border-white"
+                                                    className="bg-[#001835] text-[#FFFFFF] py-2 px-4 rounded border border-white hover:bg-[#002a50] hover:border-[#f0f0f0]"
                                                 >
                                                     Healthy Recipes
                                                 </button>
                                             </div>
                                             {/* Message input */}
-                                            <div className="mt-4 flex justify-center w-full">
-                                                <div className="relative flex items-center w-3/4">
+                                            <div className="mt-4 flex justify-center w-full" >
+                                                <div className="relative flex items-center w-3/4" style={{'margin': 'auto'}}>
                                                     <input
                                                         type="text"
                                                         className="w-full border rounded-full p-2 pr-10 focus:outline-none"
@@ -179,7 +179,7 @@ export default function ChatboxIndex() {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="relative flex items-center w-3/4">
+                                        <div className="relative flex items-center w-3/4"  style={{'margin': 'auto'}}>
                                             <input
                                                 type="text"
                                                 className="w-full border rounded-full p-2 pr-10 focus:outline-none"
