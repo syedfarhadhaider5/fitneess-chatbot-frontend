@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 
 export default function ChatboxIndex() {
-    const [uservisit, setUservisit] = useState(true);
+    const [uservisit, setUservisit] = useState(false);
     const [questions, setQuestions] = useState([]);
     const [activeCategory, setActiveCategory] = useState('');
+    const [selectedLanguage, setSelectedLanguage] = useState('');
 
     const handleCategoryClick = (category) => {
         setActiveCategory(category);
@@ -33,7 +34,9 @@ export default function ChatboxIndex() {
     const handleQuestionClick = (question) => {
         alert(question);
     };
-
+    const handleLanguageChange = (event) => {
+        setSelectedLanguage(event.target.value);
+    };
     const getButtonClass = (category) => {
         return category === activeCategory
             ? 'rounded-full font-bold py-1 px-4 text-sm bg-[#002a50] text-[#FFFFFF] rounded border border-[#f0f0f0]'
@@ -44,7 +47,7 @@ export default function ChatboxIndex() {
         <>
             <div className="h-screen">
                 <div className="container mx-auto h-full relative">
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 h-full">
+                    <div className="grid grid-cols-1 md:grid-cols-12 h-full">
                         <div className="md:col-span-9  overflow-y-auto h-full relative">
                             <div className="bg-[#002046]  shadow-lg p-4 flex flex-col h-full relative">
                                 <div className="bg-[#001835] text-[#FFFFFF] text-center	 -m-4 -mt-4 p-4 mt-0 flex justify-between items-center">
@@ -265,9 +268,46 @@ export default function ChatboxIndex() {
                                 </div>
                             </div>
                         </div>
-                        <div className="md:col-span-3 p-4">
+                        <div className="md:col-span-3 ">
                             {/* Right sidebar content */}
-                            <p className="text-white">3 Columns</p>
+                            <div className="xs:min-h-0 md:min-h-screen flex items-center justify-center bg-[#001835]">
+                                <div className="max-w-md p-8 relative">
+                                    <div className="absolute left-0 top-0 h-full w-2 bg-gradient-to-b from-[#4CAF50] to-[#00796B] rounded-l-lg"></div>
+                                    <h2 className="text-2xl mb-4 text-center text-white">Language Selector</h2>
+                                    <div className="flex flex-col space-y-4">
+                                        <label className="inline-flex items-center">
+                                            <input
+                                                type="radio"
+                                                className="form-radio"
+                                                value="english"
+                                                checked={selectedLanguage === 'english'}
+                                                onChange={handleLanguageChange}
+                                            />
+                                            <span className="ml-2 text-[#FFFFFF]">English</span>
+                                        </label>
+                                        <label className="inline-flex items-center">
+                                            <input
+                                                type="radio"
+                                                className="form-radio"
+                                                value="urdu"
+                                                checked={selectedLanguage === 'urdu'}
+                                                onChange={handleLanguageChange}
+                                            />
+                                            <span className="ml-2 text-[#FFFFFF]">Urdu</span>
+                                        </label>
+                                        <label className="inline-flex items-center">
+                                            <input
+                                                type="radio"
+                                                className="form-radio"
+                                                value="german"
+                                                checked={selectedLanguage === 'german'}
+                                                onChange={handleLanguageChange}
+                                            />
+                                            <span className="ml-2 text-[#FFFFFF]">German</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
