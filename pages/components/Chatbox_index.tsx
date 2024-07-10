@@ -46,7 +46,10 @@ export default function ChatboxIndex() {
                 <div className="container mx-auto h-full relative">
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 h-full">
                         <div className="md:col-span-9  overflow-y-auto h-full relative">
-                            <div className="bg-[#002046] border rounded-lg shadow-lg p-4 flex flex-col h-full relative">
+                            <div className="bg-[#002046]  shadow-lg p-4 flex flex-col h-full relative">
+                                <div className="bg-[#001835] text-[#FFFFFF] text-center	 -m-4 -mt-4 p-4 mt-0 flex justify-between items-center">
+                                    <h1 className="text-lg font-bold ">Fitness Pro</h1>
+                                </div>
                                 {uservisit && (
                                     <div className="flex items-center justify-center mb-4">
                                         <img
