@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 export default function ChatboxIndex() {
-    const [uservisit, setUservisit] = useState(false);
+    const [uservisit, setUservisit] = useState(true);
     const [questions, setQuestions] = useState([]);
     const [activeCategory, setActiveCategory] = useState('');
     const [selectedLanguage, setSelectedLanguage] = useState('');
@@ -50,7 +50,7 @@ export default function ChatboxIndex() {
                     <div className="grid grid-cols-1 md:grid-cols-12 h-full">
                         <div className="md:col-span-9  overflow-y-auto h-full relative">
                             <div className="bg-[#002046]  shadow-lg p-4 flex flex-col h-full relative">
-                                <div className="bg-[#001835] text-[#FFFFFF] text-center	 -m-4 -mt-4 p-4 mt-0 flex justify-between items-center">
+                                <div className="bg-[#001835] text-[#FFFFFF] text-center	 -m-4 -mt-5 p-4 mt-0 flex justify-between items-center">
                                     <h1 className="text-lg font-bold ">Fitness Pro</h1>
                                 </div>
                                 {uservisit && (
