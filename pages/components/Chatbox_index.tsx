@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 export default function ChatboxIndex() {
-    const [uservisit, setUservisit] = useState(true);
+    const [uservisit, setUservisit] = useState(false);
     const [questions, setQuestions] = useState([]);
     const [activeCategory, setActiveCategory] = useState('');
     const [selectedLanguage, setSelectedLanguage] = useState('');
@@ -64,7 +64,7 @@ export default function ChatboxIndex() {
                                 )}
                                 {!uservisit && (
                                     <>
-                                        <div className="flex-1 overflow-y-auto">
+                                        <div className="flex-1 overflow-y-auto mt-8">
                                             {/* Chat messages */}
                                             <div className="flex items-start mb-4">
                                                 <img
