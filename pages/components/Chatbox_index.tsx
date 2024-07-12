@@ -230,7 +230,7 @@ export default function ChatboxIndex() {
                                                 <button
                                                     key={index}
                                                     onClick={() => handleQuestionClick(question)}
-                                                    className="rounded-full py-1 px-4 text-sm bg-[#001835] text-[#FFFFFF] py-2 px-4 m-1 rounded border border-white hover:bg-[#002a50] hover:border-[#f0f0f0]"
+                                                    className="rounded-full py-1 px-4 text-sm bg-[#001835] text-[#FFFFFF]  m-1 rounded border border-white hover:bg-[#002a50] hover:border-[#f0f0f0]"
                                                 >
                                                     {question}
                                                 </button>
