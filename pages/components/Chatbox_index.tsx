@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
+import axios from 'axios';
 
 export default function ChatboxIndex() {
-    const [uservisit, setUservisit] = useState(false);
+    const [uservisit, setUservisit] = useState(true);
     const [questions, setQuestions] = useState([]);
     const [activeCategory, setActiveCategory] = useState('');
     const [selectedLanguage, setSelectedLanguage] = useState('');
+    const [messages, setMessages] = useState([]);
 
     const handleCategoryClick = (category) => {
         setActiveCategory(category);
@@ -31,8 +33,19 @@ export default function ChatboxIndex() {
         setQuestions(newQuestions);
     };
 
-    const handleQuestionClick = (question) => {
-        alert(question);
+    const handleQuestionClick = async (question) => {
+        try {
+            const response = await axios.post('http://localhost:8000/api/messages', {
+                question: question,
+                time: "10:00:00",
+                date: "2024-07-12",
+                flag: "unseen"
+            });
+            console.log('Message sent:', response.data);
+            setUservisit(false);
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
     };
     const handleLanguageChange = (event) => {
         setSelectedLanguage(event.target.value);
