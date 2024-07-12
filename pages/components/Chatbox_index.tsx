@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
+import { format, differenceInDays, differenceInWeeks, differenceInMonths, differenceInYears } from 'date-fns';
 
 export default function ChatboxIndex() {
     const [uservisit, setUservisit] = useState(false);
@@ -86,8 +87,34 @@ export default function ChatboxIndex() {
             console.error('Error fetching messages:', error);
         }
     };
+    const getFormattedRelativeDate = (baseDate) => {
+        const now = new Date();
+        const daysDiff = differenceInDays(now, baseDate);
+        const weeksDiff = differenceInWeeks(now, baseDate);
+        const monthsDiff = differenceInMonths(now, baseDate);
+        const yearsDiff = differenceInYears(now, baseDate);
+        const formatDate = (date) => format(date, 'yyyy-MM-dd');
 
-    useEffect(() => {
+        if (daysDiff === 0) {
+            return `Today`;
+        } else if (daysDiff === 1) {
+            return `Yesterday`;
+        } else if (daysDiff === -1) {
+            return `Tomorrow`;
+        } else if (daysDiff <= 7) {
+            return `${daysDiff} days ago`;
+        } else if (weeksDiff === 1) {
+            return `One week ago: ${formatDate(baseDate)}`;
+        } else if (monthsDiff <= 2) {
+            return `${monthsDiff} months ago`;
+        } else if (monthsDiff === 7) {
+            return `Seven months ago`;
+        } else if (yearsDiff === 1) {
+            return `One year ago`;
+        } else {
+            return `More than a year ago`;
+        }
+    };    useEffect(() => {
         // Fetch initial messages when component mounts
         fetchMessages();
     }, []);
@@ -103,7 +130,11 @@ export default function ChatboxIndex() {
             ? 'rounded-full font-bold py-1 px-4 text-sm bg-[#002a50] text-[#FFFFFF] rounded border border-[#f0f0f0]'
             : 'rounded-full font-bold py-1 px-4 text-sm bg-[#001835] text-[#FFFFFF] rounded border border-white hover:bg-[#002a50] hover:border-[#f0f0f0]';
     };
-
+    const handleDateFormatPrint = (date) =>{
+        const baseDate = new Date(date); // Set your static base date here
+        const formattedDates = getFormattedRelativeDate(baseDate);
+        return formattedDates
+    }
     return (
         <>
             <div className="h-screen">
@@ -163,7 +194,7 @@ export default function ChatboxIndex() {
                                                             <div className="bg-[#001835] text-[#FFFFFF] rounded-lg" style={{ padding: '10px' }}>
                                                                 <p>{message.question}</p>
                                                             </div>
-                                                            <span className="text-xs text-gray-500">{formatTime(message.time)},{message.date} Today</span>
+                                                            <span className="text-xs text-gray-500">{formatTime(message.time)}, {handleDateFormatPrint(message.date)}</span>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-start mb-4 justify-end">
@@ -171,7 +202,7 @@ export default function ChatboxIndex() {
                                                             <div className="bg-[#001835] text-[#FFFFFF] rounded-lg" style={{ padding: '10px' }}>
                                                                 <div className={'text-start'} dangerouslySetInnerHTML={{ __html: message.answer }}></div>
                                                             </div>
-                                                            <span className="text-xs text-gray-500">10:32 AM, Today</span>
+                                                            <span className="text-xs text-gray-500">{formatTime(message.time)}, {handleDateFormatPrint(message.date)}</span>
                                                         </div>
                                                         <img
                                                             className="w-10 h-10 rounded-full ml-3"
