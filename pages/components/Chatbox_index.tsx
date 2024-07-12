@@ -2,11 +2,13 @@ import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 
 export default function ChatboxIndex() {
-    const [uservisit, setUservisit] = useState(true);
+    const [uservisit, setUservisit] = useState(false);
     const [questions, setQuestions] = useState([]);
+    const [singleQuestion, setsingleQuestion] = useState('');
     const [activeCategory, setActiveCategory] = useState('');
     const [selectedLanguage, setSelectedLanguage] = useState('');
     const [messages, setMessages] = useState([]);
+    const [loading, setLoading] = useState(false); // State for loading indicator
 
     const handleCategoryClick = (category) => {
         setActiveCategory(category);
@@ -33,23 +35,69 @@ export default function ChatboxIndex() {
         setQuestions(newQuestions);
     };
 
+    const getCurrentTime = () => {
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const seconds = now.getSeconds().toString().padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+    };
+
+    const getCurrentDate = () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const day = now.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+    const formatTime = (timeString) => {
+        const [hours, minutes] = timeString.split(':');
+        return `${hours}:${minutes}`;
+    };
     const handleQuestionClick = async (question) => {
         try {
-            const response = await axios.post('http://localhost:8000/api/messages', {
-                question: question,
-                time: "10:00:00",
-                date: "2024-07-12",
-                flag: "unseen"
-            });
-            console.log('Message sent:', response.data);
-            setUservisit(false);
+            if(question !== ''){
+                setLoading(true); // Show loading icon
+                setsingleQuestion('')
+                const response = await axios.post('http://localhost:8000/api/messages', {
+                    question: question,
+                    time: getCurrentTime(),
+                    date: getCurrentDate(),
+                    flag: "unseen"
+                });
+                console.log('Message sent:', response.data);
+                setUservisit(false);
+                fetchMessages();
+                setLoading(false); // Hide loading icon after request completes
+
+            }
         } catch (error) {
+            setLoading(false); // Hide loading icon after request completes
             console.error('Error sending message:', error);
         }
     };
+
+    const fetchMessages = async () => {
+        try {
+            const response = await axios.get('http://localhost:8000/api/messages');
+            console.log('Messages fetched:', response.data);
+            setMessages(response.data);
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
+    };
+
+    useEffect(() => {
+        // Fetch initial messages when component mounts
+        fetchMessages();
+    }, []);
+
     const handleLanguageChange = (event) => {
         setSelectedLanguage(event.target.value);
     };
+    const handleInputQuestion = (event) => {
+        setsingleQuestion(event.target.value)
+    }
     const getButtonClass = (category) => {
         return category === activeCategory
             ? 'rounded-full font-bold py-1 px-4 text-sm bg-[#002a50] text-[#FFFFFF] rounded border border-[#f0f0f0]'
@@ -63,9 +111,33 @@ export default function ChatboxIndex() {
                     <div className="grid grid-cols-1 md:grid-cols-12 h-full">
                         <div className="md:col-span-9  overflow-y-auto h-full relative">
                             <div className="bg-[#002046]  shadow-lg p-4 flex flex-col h-full relative">
-                                <div className="bg-[#001835] text-[#FFFFFF] text-center	 -m-4 -mt-4 p-4 mt-0 flex justify-between items-center">
+                                <div className="bg-[#001835] text-[#FFFFFF] text-center	 -m-4 -mt-5 p-4 mt-0 flex justify-between items-center">
                                     <h1 className="text-lg font-bold ">Fitness Pro</h1>
                                 </div>
+                                {loading && ( // Show loading icon if loading is true
+                                    <div className="flex items-center justify-center  absolute inset-0">
+                                        <svg
+                                            className="animate-spin h-8 w-8 text-white"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            ></circle>
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A8.001 8.001 0 014.07 7.745l1.458.805A6 6 0 105 18.5v-1.209zM20 12h-4a8.001 8.001 0 01-7.07 4.455l1.457-.805A6 6 0 1019 11.5v1.209z"
+                                            ></path>
+                                        </svg>
+                                    </div>
+                                )}
                                 {uservisit && (
                                     <div className="flex items-center justify-center mb-4">
                                         <img
@@ -79,109 +151,37 @@ export default function ChatboxIndex() {
                                     <>
                                         <div className="flex-1 overflow-y-auto mt-8">
                                             {/* Chat messages */}
-                                            <div className="flex items-start mb-4">
-                                                <img
-                                                    className="w-10 h-10 rounded-full mr-3"
-                                                    src="https://via.placeholder.com/40"
-                                                    alt="Sender"
-                                                />
-                                                <div>
-                                                    <div className="bg-[#001835] text-[#FFFFFF] rounded-lg" style={{ padding: '10px' }}>
-                                                        <p>Hello! How are you?</p>
+                                            {messages.map((message, index) => (
+                                                <>
+                                                    <div className="flex items-start mb-4">
+                                                        <img
+                                                            className="w-10 h-10 rounded-full mr-3"
+                                                            src="https://via.placeholder.com/40"
+                                                            alt="Sender"
+                                                        />
+                                                        <div>
+                                                            <div className="bg-[#001835] text-[#FFFFFF] rounded-lg" style={{ padding: '10px' }}>
+                                                                <p>{message.question}</p>
+                                                            </div>
+                                                            <span className="text-xs text-gray-500">{formatTime(message.time)},{message.date} Today</span>
+                                                        </div>
                                                     </div>
-                                                    <span className="text-xs text-gray-500">10:30 AM, Today</span>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-start mb-4 justify-end">
-                                                <div className="text-right">
-                                                    <div className="bg-[#001835] text-[#FFFFFF] rounded-lg" style={{ padding: '10px' }}>
-                                                        <p>I'm good, thank you! How about you?</p>
+                                                    <div className="flex items-start mb-4 justify-end">
+                                                        <div className="text-right">
+                                                            <div className="bg-[#001835] text-[#FFFFFF] rounded-lg" style={{ padding: '10px' }}>
+                                                                <div className={'text-start'} dangerouslySetInnerHTML={{ __html: message.answer }}></div>
+                                                            </div>
+                                                            <span className="text-xs text-gray-500">10:32 AM, Today</span>
+                                                        </div>
+                                                        <img
+                                                            className="w-10 h-10 rounded-full ml-3"
+                                                            src="https://via.placeholder.com/40"
+                                                            alt="Receiver"
+                                                        />
                                                     </div>
-                                                    <span className="text-xs text-gray-500">10:32 AM, Today</span>
-                                                </div>
-                                                <img
-                                                    className="w-10 h-10 rounded-full ml-3"
-                                                    src="https://via.placeholder.com/40"
-                                                    alt="Receiver"
-                                                />
-                                            </div>
-                                            <div className="flex items-start mb-4">
-                                                <img
-                                                    className="w-10 h-10 rounded-full mr-3"
-                                                    src="https://via.placeholder.com/40"
-                                                    alt="Sender"
-                                                />
-                                                <div>
-                                                    <div className="bg-[#001835] text-[#FFFFFF] rounded-lg" style={{ padding: '10px' }}>
-                                                        <p>Hello! How are you?</p>
-                                                    </div>
-                                                    <span className="text-xs text-gray-500">10:30 AM, Today</span>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-start mb-4 justify-end">
-                                                <div className="text-right">
-                                                    <div className="bg-[#001835] text-[#FFFFFF] rounded-lg" style={{ padding: '10px' }}>
-                                                        <p>I'm good, thank you! How about you?</p>
-                                                    </div>
-                                                    <span className="text-xs text-gray-500">10:32 AM, Today</span>
-                                                </div>
-                                                <img
-                                                    className="w-10 h-10 rounded-full ml-3"
-                                                    src="https://via.placeholder.com/40"
-                                                    alt="Receiver"
-                                                />
-                                            </div>
-                                            <div className="flex items-start mb-4">
-                                                <img
-                                                    className="w-10 h-10 rounded-full mr-3"
-                                                    src="https://via.placeholder.com/40"
-                                                    alt="Sender"
-                                                />
-                                                <div>
-                                                    <div className="bg-[#001835] text-[#FFFFFF] rounded-lg" style={{ padding: '10px' }}>
-                                                        <p>Hello! How are you?</p>
-                                                    </div>
-                                                    <span className="text-xs text-gray-500">10:30 AM, Today</span>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-start mb-4 justify-end">
-                                                <div className="text-right">
-                                                    <div className="bg-[#001835] text-[#FFFFFF] rounded-lg" style={{ padding: '10px' }}>
-                                                        <p>I'm good, thank you! How about you?</p>
-                                                    </div>
-                                                    <span className="text-xs text-gray-500">10:32 AM, Today</span>
-                                                </div>
-                                                <img
-                                                    className="w-10 h-10 rounded-full ml-3"
-                                                    src="https://via.placeholder.com/40"
-                                                    alt="Receiver"
-                                                />
-                                            </div>   <div className="flex items-start mb-4">
-                                            <img
-                                                className="w-10 h-10 rounded-full mr-3"
-                                                src="https://via.placeholder.com/40"
-                                                alt="Sender"
-                                            />
-                                            <div>
-                                                <div className="bg-[#001835] text-[#FFFFFF] rounded-lg" style={{ padding: '10px' }}>
-                                                    <p>Hello! How are you?</p>
-                                                </div>
-                                                <span className="text-xs text-gray-500">10:30 AM, Today</span>
-                                            </div>
-                                        </div>
-                                            <div className="flex items-start mb-4 justify-end">
-                                                <div className="text-right">
-                                                    <div className="bg-[#001835] text-[#FFFFFF] rounded-lg" style={{ padding: '10px' }}>
-                                                        <p>I'm good, thank you! How about you?</p>
-                                                    </div>
-                                                    <span className="text-xs text-gray-500">10:32 AM, Today</span>
-                                                </div>
-                                                <img
-                                                    className="w-10 h-10 rounded-full ml-3"
-                                                    src="https://via.placeholder.com/40"
-                                                    alt="Receiver"
-                                                />
-                                            </div>
+                                                </>
+                                            ))}
+
                                             {/* Add more chat messages here if needed */}
                                         </div>
                                         <div className="mt-4 flex justify-center w-full">
@@ -190,7 +190,6 @@ export default function ChatboxIndex() {
                                                     type="text"
                                                     className="w-full border rounded-full p-2 pr-10 focus:outline-none"
                                                     placeholder="Type a message..."
-                                                    disabled={true}
                                                 />
                                                 <button
                                                     className="absolute right-0 top-0 bg-blue-500 text-white p-2 rounded-full"
@@ -258,11 +257,14 @@ export default function ChatboxIndex() {
                                                 className="w-full border rounded-full p-2 pr-10 focus:outline-none"
                                                 placeholder="Type a message..."
                                                 disabled={uservisit}
+                                                onChange={handleInputQuestion}
+                                                value={singleQuestion}
                                             />
                                             <button
                                                 className="absolute right-0 top-0 bg-blue-500 text-white p-2 rounded-full"
                                                 style={{ padding: '9px' }}
                                                 disabled={uservisit}
+                                                onClick={() => handleQuestionClick(singleQuestion)}
                                             >
                                                 <svg
                                                     xmlns="http://www.w3.org/2000/svg"
