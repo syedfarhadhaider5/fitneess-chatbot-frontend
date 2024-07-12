@@ -177,6 +177,7 @@ export default function ChatboxIndex() {
                                                     type="text"
                                                     className="w-full border rounded-full p-2 pr-10 focus:outline-none"
                                                     placeholder="Type a message..."
+                                                    disabled={true}
                                                 />
                                                 <button
                                                     className="absolute right-0 top-0 bg-blue-500 text-white p-2 rounded-full"
@@ -243,10 +244,12 @@ export default function ChatboxIndex() {
                                                 type="text"
                                                 className="w-full border rounded-full p-2 pr-10 focus:outline-none"
                                                 placeholder="Type a message..."
+                                                disabled={uservisit}
                                             />
                                             <button
                                                 className="absolute right-0 top-0 bg-blue-500 text-white p-2 rounded-full"
                                                 style={{ padding: '9px' }}
+                                                disabled={uservisit}
                                             >
                                                 <svg
                                                     xmlns="http://www.w3.org/2000/svg"
