@@ -134,8 +134,21 @@ export default function ChatboxIndex() {
             return `More than a year ago`;
         }
     };
-    const handleLanguageChange = (event) => {
+    const handleLanguageChange = async (event) => {
         setSelectedLanguage(event.target.value);
+        setLoading(true); // Show loading icon
+        try {
+            const response = await axios.post('http://localhost:8000/api/translate-and-update', {
+                language: event.target.value,
+            });
+
+            console.log(response.data); // Handle success response
+            setLoading(false); // Show loading icon
+
+        } catch (error) {
+            console.error('Error:', error); // Handle error
+        }
+
     };
     const handleInputQuestion = (event) => {
         setsingleQuestion(event.target.value)
@@ -154,7 +167,7 @@ export default function ChatboxIndex() {
     useEffect(() => {
         // Fetch initial messages when component mounts
         fetchMessages();
-    }, []);
+    }, [loading]);
     useEffect(() => {
         if (messages.length > 0) { // Check if messages exist to prevent errors
             scrollToBottom();
@@ -168,7 +181,7 @@ export default function ChatboxIndex() {
                     <div className="grid grid-cols-1 md:grid-cols-12 h-full">
                         <div className="md:col-span-9  overflow-y-auto h-full relative">
                             <div className="bg-[#002046]  shadow-lg p-4 flex flex-col h-full relative">
-                                <div className="bg-[#001835] text-[#FFFFFF] text-center	 -m-4 -mt-5 p-4 mt-0 flex justify-between items-center">
+                                <div className="bg-[#001835] text-[#FFFFFF] text-center	 -m-4 -mt-4 p-4 mt-0 flex justify-between items-center">
                                     <h1 className="text-lg font-bold ">Fitness Pro</h1>
                                 </div>
                                 {loading && ( // Show loading icon if loading is true
@@ -375,6 +388,7 @@ export default function ChatboxIndex() {
                                                 value="english"
                                                 checked={selectedLanguage === 'english'}
                                                 onChange={handleLanguageChange}
+                                                value={selectedLanguage}
                                             />
                                             <span className="ml-2 text-[#FFFFFF]">English</span>
                                         </label>
@@ -397,6 +411,36 @@ export default function ChatboxIndex() {
                                                 onChange={handleLanguageChange}
                                             />
                                             <span className="ml-2 text-[#FFFFFF]">German</span>
+                                        </label>
+                                        <label className="inline-flex items-center">
+                                            <input
+                                                type="radio"
+                                                className="form-radio"
+                                                value="chinese"
+                                                checked={selectedLanguage === 'chinese'}
+                                                onChange={handleLanguageChange}
+                                            />
+                                            <span className="ml-2 text-[#FFFFFF]">Chinese</span>
+                                        </label>
+                                        <label className="inline-flex items-center">
+                                            <input
+                                                type="radio"
+                                                className="form-radio"
+                                                value="persian"
+                                                checked={selectedLanguage === 'persian'}
+                                                onChange={handleLanguageChange}
+                                            />
+                                            <span className="ml-2 text-[#FFFFFF]">Persian</span>
+                                        </label>
+                                        <label className="inline-flex items-center">
+                                            <input
+                                                type="radio"
+                                                className="form-radio"
+                                                value="arabic"
+                                                checked={selectedLanguage === 'arabic'}
+                                                onChange={handleLanguageChange}
+                                            />
+                                            <span className="ml-2 text-[#FFFFFF]">Arabic</span>
                                         </label>
                                     </div>
                                 </div>
