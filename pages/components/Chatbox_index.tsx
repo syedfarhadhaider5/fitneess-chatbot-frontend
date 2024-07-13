@@ -1,6 +1,8 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState,useRef} from 'react';
 import axios from 'axios';
 import { format, differenceInDays, differenceInWeeks, differenceInMonths, differenceInYears } from 'date-fns';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheck, faCheckDouble } from '@fortawesome/free-solid-svg-icons';
 
 export default function ChatboxIndex() {
     const [uservisit, setUservisit] = useState(false);
@@ -10,7 +12,14 @@ export default function ChatboxIndex() {
     const [selectedLanguage, setSelectedLanguage] = useState('');
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false); // State for loading indicator
+    const messagesEndRef = useRef(null); // Ref to the dummy div at the bottom
 
+    const scrollToBottom = () => {
+        if (messagesEndRef.current && messagesEndRef.current.scrollHeight > messagesEndRef.current.clientHeight) {
+            // Ensure scroll height is greater than client height for relevance
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
     const handleCategoryClick = (category) => {
         setActiveCategory(category);
         let newQuestions = [];
@@ -83,10 +92,20 @@ export default function ChatboxIndex() {
             const response = await axios.get('http://localhost:8000/api/messages');
             console.log('Messages fetched:', response.data);
             setMessages(response.data);
+
+            // Update each message's flag column to 'seen'
+            const updatePromises = response.data.map(message => {
+                return axios.put(`http://localhost:8000/api/messages/${message.id}`, { flag: 'seen' });
+            });
+
+            await Promise.all(updatePromises);
+            console.log('All messages updated to seen');
+
         } catch (error) {
-            console.error('Error fetching messages:', error);
+            console.error('Error fetching or updating messages:', error);
         }
     };
+
     const getFormattedRelativeDate = (baseDate) => {
         const now = new Date();
         const daysDiff = differenceInDays(now, baseDate);
@@ -114,11 +133,7 @@ export default function ChatboxIndex() {
         } else {
             return `More than a year ago`;
         }
-    };    useEffect(() => {
-        // Fetch initial messages when component mounts
-        fetchMessages();
-    }, []);
-
+    };
     const handleLanguageChange = (event) => {
         setSelectedLanguage(event.target.value);
     };
@@ -135,6 +150,17 @@ export default function ChatboxIndex() {
         const formattedDates = getFormattedRelativeDate(baseDate);
         return formattedDates
     }
+
+    useEffect(() => {
+        // Fetch initial messages when component mounts
+        fetchMessages();
+    }, []);
+    useEffect(() => {
+        if (messages.length > 0) { // Check if messages exist to prevent errors
+            scrollToBottom();
+        }
+    }, [messages]);
+
     return (
         <>
             <div className="h-screen">
@@ -191,10 +217,19 @@ export default function ChatboxIndex() {
                                                             alt="Sender"
                                                         />
                                                         <div>
-                                                            <div className="bg-[#001835] text-[#FFFFFF] rounded-lg" style={{ padding: '10px' }}>
+                                                            <div className="bg-[#001835] text-[#FFFFFF] rounded-lg text-sm" style={{ padding: '10px' }}>
                                                                 <p>{message.question}</p>
                                                             </div>
-                                                            <span className="text-xs text-gray-500">{formatTime(message.time)}, {handleDateFormatPrint(message.date)}</span>
+                                                            <span className="text-xs text-gray-500">
+                                                                <div style={{ cursor: 'pointer', display: 'inline-block' }} className={'pr-2'}>
+                                                                    {message.flag === 'seen' ? (
+                                                                        <FontAwesomeIcon icon={faCheckDouble} style={{ color: '#f9c604' }} />
+                                                                    ) : (
+                                                                        <FontAwesomeIcon icon={faCheck} />
+                                                                    )}
+                                                                </div>
+                                                                {formatTime(message.time)}, {handleDateFormatPrint(message.date)}
+                                                            </span>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-start mb-4 justify-end">
@@ -202,7 +237,16 @@ export default function ChatboxIndex() {
                                                             <div className="bg-[#001835] text-[#FFFFFF] rounded-lg" style={{ padding: '10px' }}>
                                                                 <div className={'text-start'} dangerouslySetInnerHTML={{ __html: message.answer }}></div>
                                                             </div>
-                                                            <span className="text-xs text-gray-500">{formatTime(message.time)}, {handleDateFormatPrint(message.date)}</span>
+                                                            <span className="text-xs text-gray-500">
+                                                                 <div style={{ cursor: 'pointer', display: 'inline-block' }} className={'pr-2'}>
+                                                                    {message.flag === 'seen' ? (
+                                                                        <FontAwesomeIcon icon={faCheckDouble} style={{ color: '#f9c604' }} />
+                                                                    ) : (
+                                                                        <FontAwesomeIcon icon={faCheck} />
+                                                                    )}
+                                                                </div>
+                                                                {formatTime(message.time)}, {handleDateFormatPrint(message.date)}
+                                                            </span>
                                                         </div>
                                                         <img
                                                             className="w-10 h-10 rounded-full ml-3"
