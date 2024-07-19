@@ -3,6 +3,9 @@ import axios from 'axios';
 import { format, differenceInDays, differenceInWeeks, differenceInMonths, differenceInYears } from 'date-fns';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faCheckDouble } from '@fortawesome/free-solid-svg-icons';
+import { io } from 'socket.io-client';
+
+// Initialize socket connection
 
 export default function ChatboxIndex() {
     const [uservisit, setUservisit] = useState(false);
@@ -69,13 +72,13 @@ export default function ChatboxIndex() {
             if(question !== ''){
                 setLoading(true); // Show loading icon
                 setsingleQuestion('')
-                const response = await axios.post('http://localhost:8000/api/messages', {
+                const response = await axios.post('http://localhost:4000/messages', {
                     question: question,
                     time: getCurrentTime(),
                     date: getCurrentDate(),
                     flag: "unseen"
                 });
-                console.log('Message sent:', response.data);
+                 console.log('Message sent:', response.data);
                 setUservisit(false);
                 fetchMessages();
                 setLoading(false); // Hide loading icon after request completes
@@ -86,20 +89,17 @@ export default function ChatboxIndex() {
             console.error('Error sending message:', error);
         }
     };
-
     const fetchMessages = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/api/messages');
-            console.log('Messages fetched:', response.data);
+            const response = await axios.get('http://localhost:4000/messages');
             setMessages(response.data);
 
             // Update each message's flag column to 'seen'
             const updatePromises = response.data.map(message => {
-                return axios.put(`http://localhost:8000/api/messages/${message.id}`, { flag: 'seen' });
+                return axios.patch(`http://localhost:4000/messages/${message._id}`, { flag: 'seen' });
             });
 
             await Promise.all(updatePromises);
-            console.log('All messages updated to seen');
 
         } catch (error) {
             console.error('Error fetching or updating messages:', error);
@@ -134,22 +134,38 @@ export default function ChatboxIndex() {
             return `More than a year ago`;
         }
     };
-    const handleLanguageChange = async (event) => {
-        setSelectedLanguage(event.target.value);
+    const handleLanguageChange = (event) => {
+        const newLanguage = event.target.value;
+        setSelectedLanguage(newLanguage);
         setLoading(true); // Show loading icon
-        try {
-            const response = await axios.post('http://localhost:8000/api/translate-and-update', {
-                language: event.target.value,
-            });
 
-            console.log(response.data); // Handle success response
-            setLoading(false); // Show loading icon
-
-        } catch (error) {
-            console.error('Error:', error); // Handle error
-        }
-
+        // Emit the language change event to the server
+        socket.emit('changeLanguage', { language: newLanguage }, (response) => {
+            console.log('Server response:', response); // Debugging log
+            if (response.success) {
+                console.log('Language changed successfully:', response.data);
+            } else {
+                console.error('Error changing language:', response.error);
+            }
+            setLoading(false); // Hide loading icon
+        });
     };
+    // const handleLanguageChange = async (event) => {
+    //     setSelectedLanguage(event.target.value);
+    //     setLoading(true); // Show loading icon
+    //     try {
+    //         const response = await axios.post('http://localhost:4000/messages/translate', {
+    //             language: event.target.value,
+    //         });
+    //
+    //         console.log(event.target.value); // Handle success response
+    //         setLoading(false); // Show loading icon
+    //
+    //     } catch (error) {
+    //         console.error('Error:', error); // Handle error
+    //     }
+    //
+    // };
     const handleInputQuestion = (event) => {
         setsingleQuestion(event.target.value)
     }
@@ -163,9 +179,32 @@ export default function ChatboxIndex() {
         const formattedDates = getFormattedRelativeDate(baseDate);
         return formattedDates
     }
+    // Initialize socket connection
+    const socket = io('http://localhost:4000');
 
     useEffect(() => {
-        // Fetch initial messages when component mounts
+
+        socket.on('connect', () => {
+            console.log('Connected to the server');
+        });
+
+        socket.on('disconnect', () => {
+            alert('Disconnected from the server');
+        });
+
+        socket.on('message', (message) => {
+            setMessages((prevMessages) => [...prevMessages, message]);
+        });
+
+        return () => {
+            socket.disconnect();
+        };
+    }, []);
+
+    useEffect(() => {
+        fetchMessages();
+    }, []);
+    useEffect(() => {
         fetchMessages();
     }, [loading]);
     useEffect(() => {
@@ -181,7 +220,7 @@ export default function ChatboxIndex() {
                     <div className="grid grid-cols-1 md:grid-cols-12 h-full">
                         <div className="md:col-span-9  overflow-y-auto h-full relative">
                             <div className="bg-[#002046]  shadow-lg p-4 flex flex-col h-full relative">
-                                <div className="bg-[#001835] text-[#FFFFFF] text-center	 -m-4 -mt-4 p-4 mt-0 flex justify-between items-center">
+                                <div className="bg-[#001835] text-[#FFFFFF] text-center	 -m-4 -mt-5 p-4 mt-0 flex justify-between items-center">
                                     <h1 className="text-lg font-bold ">Fitness Pro</h1>
                                 </div>
                                 {loading && ( // Show loading icon if loading is true
@@ -388,10 +427,10 @@ export default function ChatboxIndex() {
                                                 value="english"
                                                 checked={selectedLanguage === 'english'}
                                                 onChange={handleLanguageChange}
-                                                value={selectedLanguage}
                                             />
                                             <span className="ml-2 text-[#FFFFFF]">English</span>
                                         </label>
+
                                         <label className="inline-flex items-center">
                                             <input
                                                 type="radio"
